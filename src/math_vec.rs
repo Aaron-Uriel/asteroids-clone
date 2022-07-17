@@ -14,21 +14,6 @@ impl MathVec32 {
         MathVec32 { magnitude: mag, angle: angle }
     }
 
-    fn get_quadrant(&self) -> Quadrant {
-        if self.angle.cos().is_sign_positive() && self.angle.sin().is_sign_positive() {
-            Quadrant::First
-        }
-        else if self.angle.cos().is_sign_positive() {
-            Quadrant::Fourth
-        }
-        else if self.angle.sin().is_sign_positive() {
-            Quadrant::Second
-        } 
-        else {
-            Quadrant::Third
-        }
-    }
-
     fn get_quadrant_by_components(x_comp: f32, y_comp: f32) -> Quadrant {
         if x_comp.is_sign_positive() && y_comp.is_sign_positive() {
             Quadrant::First

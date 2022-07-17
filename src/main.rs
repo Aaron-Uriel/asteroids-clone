@@ -6,6 +6,11 @@ use debug::DebugPlugin;
 mod player;
 use player::PlayerPlugin;
 
+mod math_vec;
+
+mod ascii_sheet;
+use ascii_sheet::AsciiPlugin;
+
 const HEIGHT: f32 = 720.0;
 const ASPECT_RATIO: f32 = 4.0 / 3.0;
 
@@ -29,7 +34,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(PlayerPlugin)
         .add_plugin(DebugPlugin)
-        .add_startup_system_to_stage(StartupStage::PreStartup, load_spritesheet)
+        .add_plugin(AsciiPlugin)
         .add_startup_system(spawn_camera)
         .run();
 }
@@ -45,26 +50,5 @@ fn spawn_camera(mut commands: Commands) {
     
     camera.orthographic_projection.scaling_mode = ScalingMode::None;
 
-    commands.spawn_bundle(camera);    
-}
-
-struct AsciiSheet(Handle<TextureAtlas>);
-
-fn load_spritesheet(
-    mut commands: Commands,
-    assets: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>
-) {
-    let image = assets.load("Ascii.png");
-    let atlas = TextureAtlas::from_grid_with_padding(
-        image,
-        Vec2::splat(9.0),
-        16,
-        16,
-        Vec2::splat(2.0)
-    );
-
-    let atlas_handle = texture_atlases.add(atlas);
-
-    commands.insert_resource(AsciiSheet(atlas_handle));
+    commands.spawn_bundle(camera);
 }
