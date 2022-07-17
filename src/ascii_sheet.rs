@@ -28,7 +28,10 @@ pub fn spawn_ascii_sprite(
     commands.spawn_bundle(SpriteSheetBundle {
         sprite: sprite,
         texture_atlas: ascii.0.clone(),
-        transform: Transform::from_xyz(0.0, 0.0, 900.0),
+        transform: Transform {
+            translation: translation,
+            ..Default::default()
+        },
         ..Default::default()
     })
     .id()
