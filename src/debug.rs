@@ -14,8 +14,10 @@ impl Plugin for DebugPlugin {
             app.add_plugin(WorldInspectorPlugin::new())
                 .register_inspectable::<entities::Player>()
                 .register_inspectable::<entities::FacingAngle>()
+                .register_inspectable::<entities::PhysicalAttributes>()
                 .register_inspectable::<physics::MathVec32>()
-                .register_inspectable::<physics::Velocity>();
+                .register_inspectable::<physics::Velocity>()
+                .register_inspectable::<physics::Momentum>();
         }
     }
 }

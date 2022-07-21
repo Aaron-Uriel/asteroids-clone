@@ -1,14 +1,40 @@
-use std::f32;
+use std::{
+    f32,
+    default::Default
+};
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
 
 use crate::{
     ascii_sheet::*,
-    physics::Velocity
+    physics::*
 };
 
-#[derive(Inspectable, Component)]
-pub struct FacingAngle(f32);
+mod entity_components {
+    use super::*;
+
+    #[derive(Inspectable, Component)]
+    pub struct FacingAngle(pub f32);
+    
+    #[derive(Inspectable, Component)]
+    pub struct PhysicalAttributes {
+        pub mass: Mass,
+        pub vel: Velocity,
+        pub momentum: Momentum
+    }
+    
+    impl Default for PhysicalAttributes {
+        fn default() -> PhysicalAttributes {
+            PhysicalAttributes { mass: Mass(0.0), vel: Velocity::new(0.0, 0.0), momentum: Momentum::new(0.0, 0.0) }
+        }
+    }
+
+    #[derive(Inspectable, Component)]
+    pub enum UpdateEvent { Start, VelocityUpdated, MassUpdated, MomentumUpdated }
+}
+pub use entity_components::*;
+
+
 
 #[derive(Inspectable, Component)]
 pub struct Player;
@@ -23,6 +49,7 @@ impl Plugin for EntitiesPlugin {
         app.add_startup_system(spawn_player)
             .add_startup_system(spawn_asteroids)
             .add_system(handle_player_input)
+            .add_system(physics_updater_system)
             .add_system(movement_system);
     }
 }
@@ -57,10 +84,12 @@ fn spawn_asteroids(mut commands: Commands, ascii: Res<AsciiSheet>) {
         commands.entity(new_asteroid)
             .insert(Asteroid)
             .insert(FacingAngle(new_random_angle))
-            .insert(Velocity::new(
-                new_random_magnitude, 
-                new_random_angle
-            ))
+            .insert(PhysicalAttributes {
+                mass: Mass(3.0),
+                vel: Velocity::new(new_random_magnitude, new_random_angle),
+                ..Default::default()
+            })
+            .insert(UpdateEvent::Start)
             .insert(Name::new(format!("Asteroid {}", i)));
         asteroids.push(new_asteroid);
     }
@@ -84,26 +113,31 @@ fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
     commands.entity(player)
         .insert(Player)
         .insert(FacingAngle(std::f32::consts::PI / 2.0))
-        .insert(Velocity::new(0.0, 0.0))
+        .insert(PhysicalAttributes {
+            mass: Mass(5.0),
+            vel: Velocity::new(0.0, 0.0),
+            ..Default::default()
+        })
+        .insert(UpdateEvent::Start)
         .insert(Name::new("Player"));
 }
 
 fn movement_system(
-    mut query: Query<(&Velocity, &mut Transform, &FacingAngle)>
+    mut query: Query<(&PhysicalAttributes, &mut Transform, &FacingAngle)>
 ) {
-    for (velocity, mut transform, facing_angle) in query.iter_mut() {
+    for (physic_attrs, mut transform, facing_angle) in query.iter_mut() {
         transform.rotation = Quat::from_rotation_z(facing_angle.0);
-        transform.translation.x += velocity.get_magnitude() * f32::cos(velocity.get_angle());
-        transform.translation.y += velocity.get_magnitude() * f32::sin(velocity.get_angle());
+        transform.translation.x += physic_attrs.vel.get_magnitude() * f32::cos(physic_attrs.vel.get_angle());
+        transform.translation.y += physic_attrs.vel.get_magnitude() * f32::sin(physic_attrs.vel.get_angle());
     }
 }
 
 fn handle_player_input(
-    mut query: Query<(&mut Velocity, &mut FacingAngle), With<Player>>,
+    mut query: Query<(&mut PhysicalAttributes, &mut FacingAngle, &mut UpdateEvent), With<Player>>,
     keyboard: Res<Input<KeyCode>>,
     time: Res<Time>
 ) {
-    let (mut velocity, mut facing_angle) = query.single_mut();
+    let (mut physic_attrs, mut facing_angle, update_event) = query.single_mut();
 
     let mut delta_velocity: Option<Velocity> = None;
     if keyboard.any_pressed([KeyCode::W, KeyCode::S, KeyCode::Up, KeyCode::Down]) {
@@ -124,6 +158,27 @@ fn handle_player_input(
     }
 
     if let Some(velocity_to_add) = delta_velocity {
-        velocity.vector_add(velocity_to_add);
+        physic_attrs.vel.vector_add(velocity_to_add);
+        *update_event.into_inner() = UpdateEvent::VelocityUpdated;
+    }
+}
+
+fn physics_updater_system(mut query: Query<(&mut PhysicalAttributes, &UpdateEvent)>) {
+    for (mut physical_attribs, update_event) in query.iter_mut() {
+        if physical_attribs.is_changed() {
+            match update_event {
+                UpdateEvent::Start | UpdateEvent::VelocityUpdated | UpdateEvent::MassUpdated =>
+                    physical_attribs.momentum = Momentum::new(
+                        physical_attribs.mass.0 * physical_attribs.vel.get_magnitude(), 
+                        physical_attribs.vel.get_angle()
+                    ),
+                
+                UpdateEvent::MomentumUpdated =>
+                    physical_attribs.vel = Velocity::new(
+                        physical_attribs.momentum.get_magnitude() / physical_attribs.mass.0,
+                        physical_attribs.momentum.get_angle()
+                    )
+            };
+        }
     }
 }
