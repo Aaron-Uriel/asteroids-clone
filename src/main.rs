@@ -3,10 +3,10 @@ use bevy::{prelude::*, render::camera::ScalingMode};
 mod debug;
 use debug::DebugPlugin;
 
-mod player;
-use player::PlayerPlugin;
+mod entities;
+use entities::EntitiesPlugin;
 
-mod math_vec;
+mod physics;
 
 mod ascii_sheet;
 use ascii_sheet::AsciiPlugin;
@@ -32,7 +32,7 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(PlayerPlugin)
+        .add_plugin(EntitiesPlugin)
         .add_plugin(DebugPlugin)
         .add_plugin(AsciiPlugin)
         .add_startup_system(spawn_camera)

@@ -1,0 +1,129 @@
+use std::f32;
+use bevy::prelude::*;
+use bevy_inspector_egui::Inspectable;
+
+use crate::{
+    ascii_sheet::*,
+    physics::Velocity
+};
+
+#[derive(Inspectable, Component)]
+pub struct FacingAngle(f32);
+
+#[derive(Inspectable, Component)]
+pub struct Player;
+
+#[derive(Inspectable, Component)]
+pub struct Asteroid;
+
+pub struct EntitiesPlugin;
+
+impl Plugin for EntitiesPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_player)
+            .add_startup_system(spawn_asteroids)
+            .add_system(handle_player_input)
+            .add_system(movement_system);
+    }
+}
+
+fn spawn_asteroids(mut commands: Commands, ascii: Res<AsciiSheet>) {
+    use rand::Rng;
+    use std::ops::Range;
+
+    let mut rng = rand::thread_rng();
+    const COORDS_RANGE: Range<f32> = -100.0..100.0;
+    const VELOCITY_RANGE: (Range<f32>, Range<f32>) = (0.0..0.3, 0.0..(2.0*f32::consts::PI));
+
+    let mut asteroids: Vec<Entity> = Vec::new();
+
+    for i in 0..10 {
+        let new_random_coords = Vec3::new(
+            rng.gen_range(COORDS_RANGE), 
+            rng.gen_range(COORDS_RANGE), 
+            700.0
+        );
+        let new_random_magnitude = rng.gen_range(VELOCITY_RANGE.0);
+        let new_random_angle = rng.gen_range(VELOCITY_RANGE.1);
+
+        let new_asteroid = spawn_ascii_sprite(
+            &mut commands,
+            &ascii,
+            0,
+            Color::rgb(0.4, 0.5, 0.9),
+            new_random_coords
+        );
+
+        commands.entity(new_asteroid)
+            .insert(Asteroid)
+            .insert(FacingAngle(new_random_angle))
+            .insert(Velocity::new(
+                new_random_magnitude, 
+                new_random_angle
+            ))
+            .insert(Name::new(format!("Asteroid {}", i)));
+        asteroids.push(new_asteroid);
+    }
+
+    commands.spawn()
+        .insert(Name::new("Asteroids"))
+        .insert(Transform::default())
+        .insert(GlobalTransform::default())
+        .push_children(&asteroids);
+}
+
+fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
+    let player = spawn_ascii_sprite(
+        &mut commands,
+        &ascii,
+        16,
+        Color::rgb(0.3, 0.3, 0.9),
+        Vec3::new(0.0, 0.0, 900.0)
+    );
+
+    commands.entity(player)
+        .insert(Player)
+        .insert(FacingAngle(std::f32::consts::PI / 2.0))
+        .insert(Velocity::new(0.0, 0.0))
+        .insert(Name::new("Player"));
+}
+
+fn movement_system(
+    mut query: Query<(&Velocity, &mut Transform, &FacingAngle)>
+) {
+    for (velocity, mut transform, facing_angle) in query.iter_mut() {
+        transform.rotation = Quat::from_rotation_z(facing_angle.0);
+        transform.translation.x += velocity.get_magnitude() * f32::cos(velocity.get_angle());
+        transform.translation.y += velocity.get_magnitude() * f32::sin(velocity.get_angle());
+    }
+}
+
+fn handle_player_input(
+    mut query: Query<(&mut Velocity, &mut FacingAngle), With<Player>>,
+    keyboard: Res<Input<KeyCode>>,
+    time: Res<Time>
+) {
+    let (mut velocity, mut facing_angle) = query.single_mut();
+
+    let mut delta_velocity: Option<Velocity> = None;
+    if keyboard.any_pressed([KeyCode::W, KeyCode::S, KeyCode::Up, KeyCode::Down]) {
+        let magnitude: f32 =  match keyboard.any_pressed([KeyCode::W, KeyCode::Up]) {
+            true =>   0.35 * time.delta_seconds(),
+            false => -0.35 * time.delta_seconds()
+        };
+        let angle: f32 = facing_angle.0;
+
+        delta_velocity = Some(Velocity::new(magnitude, angle));
+    }
+
+    if keyboard.any_pressed([KeyCode::A, KeyCode::Left, KeyCode::D, KeyCode::Right]) {
+        facing_angle.0 +=  match keyboard.any_pressed([KeyCode::A, KeyCode::Left]) {
+            true =>   f32::consts::PI * time.delta_seconds(),
+            false => -f32::consts::PI * time.delta_seconds()
+        };
+    }
+
+    if let Some(velocity_to_add) = delta_velocity {
+        velocity.vector_add(velocity_to_add);
+    }
+}

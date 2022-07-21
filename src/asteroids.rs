@@ -8,13 +8,11 @@ use crate::{
 };
 
 #[derive(Inspectable, Component)]
-pub struct Player {
-    facing_angle: f32
+pub struct Asteroid {
+    angle: f32,
 }
 
 
-#[derive(Inspectable, Component)]
-pub struct Velocity(MathVec32);
 
 pub struct PlayerPlugin;
 
@@ -41,14 +39,14 @@ fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
         .insert(Name::new("Player"));
 }
 
-fn player_movement(
-    mut query: Query<(&Player, &Velocity, &mut Transform)>
+fn entities_movement(
+    mut query: Query<(&Velocity, &mut Transform)>
 ) {
-    let (player, velocity, mut transform) = query.single_mut();
-
-    transform.rotation = Quat::from_rotation_z(player.facing_angle);
-    transform.translation.x += velocity.0.get_magnitude() * f32::cos(velocity.0.get_angle());
-    transform.translation.y += velocity.0.get_magnitude() * f32::sin(velocity.0.get_angle());
+    for (entity, velocity, mut transform) in query.iter() {
+        transform.rotation = Quat::from_rotation_z(player.facing_angle);
+        transform.translation.x += velocity.0.get_magnitude() * f32::cos(velocity.0.get_angle());
+        transform.translation.y += velocity.0.get_magnitude() * f32::sin(velocity.0.get_angle());
+    }
 }
 
 fn modify_velocity(

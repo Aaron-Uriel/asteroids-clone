@@ -1,7 +1,7 @@
 use std::f32;
 use bevy_inspector_egui::Inspectable;
 
-enum Quadrant {First, Second, Third, Fourth}
+pub enum Quadrant { First, Second, Third, Fourth }
 
 #[derive(Inspectable)]
 pub struct MathVec32 {

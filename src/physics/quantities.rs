@@ -1,0 +1,1 @@
+pub struct Mass(f32);
