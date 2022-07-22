@@ -1,8 +1,4 @@
 mod math_vec;
-pub use math_vec::{
-    MathVec,
-    Quadrant
-};
 
 mod quantities;
 pub use quantities::Mass;

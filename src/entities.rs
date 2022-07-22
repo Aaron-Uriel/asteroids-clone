@@ -19,13 +19,17 @@ mod entity_components {
     #[derive(Inspectable, Component)]
     pub struct PhysicalAttributes {
         pub mass: Mass,
-        pub vel: MathVec<Velocity>,
-        pub momentum: MathVec<Momentum>
+        pub vel: Velocity,
+        pub momentum: Momentum
     }
     
     impl Default for PhysicalAttributes {
         fn default() -> PhysicalAttributes {
-            PhysicalAttributes { mass: Mass(0.0), vel: MathVec::new(0.0, 0.0), momentum: MathVec::new(0.0, 0.0) }
+            PhysicalAttributes {
+                mass: Mass(0.0),
+                vel: Velocity { magnitude: 0.0, angle: 0.0},
+                momentum: Momentum {magnitude: 0.0, angle: 0.0}
+            }
         }
     }
 
@@ -86,7 +90,10 @@ fn spawn_asteroids(mut commands: Commands, ascii: Res<AsciiSheet>) {
             .insert(FacingAngle(new_random_angle))
             .insert(PhysicalAttributes {
                 mass: Mass(3.0),
-                vel: MathVec::new(new_random_magnitude, new_random_angle),
+                vel: Velocity {
+                    magnitude: new_random_magnitude,
+                    angle: new_random_angle
+                },
                 ..Default::default()
             })
             .insert(UpdateEvent::Start)
@@ -115,7 +122,10 @@ fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
         .insert(FacingAngle(std::f32::consts::PI / 2.0))
         .insert(PhysicalAttributes {
             mass: Mass(5.0),
-            vel: MathVec::new(0.0, 0.0),
+            vel: Velocity {
+                magnitude: 0.0,
+                angle: 0.0
+            },
             ..Default::default()
         })
         .insert(UpdateEvent::Start)
@@ -139,7 +149,7 @@ fn handle_player_input(
 ) {
     let (mut physic_attrs, mut facing_angle, update_event) = query.single_mut();
 
-    let mut delta_velocity: Option<MathVec<Velocity>> = None;
+    let mut delta_velocity: Option<Velocity> = None;
     if keyboard.any_pressed([KeyCode::W, KeyCode::S, KeyCode::Up, KeyCode::Down]) {
         let magnitude: f32 =  match keyboard.any_pressed([KeyCode::W, KeyCode::Up]) {
             true =>   0.35 * time.delta_seconds(),
@@ -147,7 +157,7 @@ fn handle_player_input(
         };
         let angle: f32 = facing_angle.0;
 
-        delta_velocity = Some(MathVec::new(magnitude, angle));
+        delta_velocity = Some(Velocity {magnitude: magnitude, angle: angle});
     }
 
     if keyboard.any_pressed([KeyCode::A, KeyCode::Left, KeyCode::D, KeyCode::Right]) {
@@ -168,16 +178,16 @@ fn physics_updater_system(mut query: Query<(&mut PhysicalAttributes, &UpdateEven
         if physical_attribs.is_changed() {
             match update_event {
                 UpdateEvent::Start | UpdateEvent::VelocityUpdated | UpdateEvent::MassUpdated =>
-                    physical_attribs.momentum = MathVec::new(
-                        physical_attribs.mass.0 * physical_attribs.vel.magnitude, 
-                        physical_attribs.vel.angle
-                    ),
+                    physical_attribs.momentum = Momentum {
+                        magnitude: physical_attribs.mass.0 * physical_attribs.vel.magnitude, 
+                        angle: physical_attribs.vel.angle
+                    },
                 
                 UpdateEvent::MomentumUpdated =>
-                    physical_attribs.vel = MathVec::new(
-                        physical_attribs.momentum.magnitude / physical_attribs.mass.0,
-                        physical_attribs.momentum.angle
-                    )
+                    physical_attribs.vel = Velocity {
+                        magnitude: physical_attribs.momentum.magnitude / physical_attribs.mass.0,
+                        angle: physical_attribs.momentum.angle
+                    }
             };
         }
     }
