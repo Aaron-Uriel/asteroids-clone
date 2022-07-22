@@ -1,6 +1,6 @@
 mod math_vec;
 pub use math_vec::{
-    MathVec32,
+    MathVec,
     Quadrant
 };
 

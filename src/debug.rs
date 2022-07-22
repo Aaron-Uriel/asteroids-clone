@@ -15,7 +15,8 @@ impl Plugin for DebugPlugin {
                 .register_inspectable::<entities::Player>()
                 .register_inspectable::<entities::FacingAngle>()
                 .register_inspectable::<entities::PhysicalAttributes>()
-                .register_inspectable::<physics::MathVec32>()
+                .register_inspectable::<physics::MathVec<physics::Velocity>>()
+                .register_inspectable::<physics::MathVec<physics::Momentum>>()
                 .register_inspectable::<physics::Velocity>()
                 .register_inspectable::<physics::Momentum>();
         }
