@@ -1,5 +1,5 @@
 use bevy_inspector_egui::Inspectable;
-use super::math_vec::*;
+use super::math_vec::{*, self};
 
 #[derive(Inspectable)]
 pub struct Velocity {
@@ -8,15 +8,14 @@ pub struct Velocity {
 }
 
 impl Velocity {
-    pub fn vec_add(&mut self, mut other_vec: Velocity) {
-        self.as_generic().vec_add(other_vec.as_generic());
-    }
+    pub fn vec_add(&mut self, other_vec: Velocity) {
+        let result = math_vec::add(
+            InternalMathVec { magnitude: self.magnitude, angle: self.angle },
+            InternalMathVec { magnitude: other_vec.magnitude, angle: other_vec.angle }
+        );
 
-    fn as_generic(&mut self) -> GenericMathVec {
-        GenericMathVec {
-            magnitude: &mut self.magnitude,
-            angle: &mut self.angle
-        }
+        self.magnitude = result.magnitude;
+        self.angle = result.angle;
     }
 }
 
@@ -27,14 +26,13 @@ pub struct Momentum {
 }
 
 impl Momentum {
-    pub fn vec_add(&mut self, mut other_vec: Momentum) {
-        self.as_generic().vec_add(other_vec.as_generic());
-    }
+    pub fn vec_add(&mut self, other_vec: Momentum) {
+        let result = math_vec::add(
+            InternalMathVec { magnitude: self.magnitude, angle: self.angle },
+            InternalMathVec { magnitude: other_vec.magnitude, angle: other_vec.angle }
+        );
 
-    fn as_generic(&mut self) -> GenericMathVec {
-        GenericMathVec {
-            magnitude: &mut self.magnitude,
-            angle: &mut self.angle
-        }
+        self.magnitude = result.magnitude;
+        self.angle = result.angle;
     }
 }
