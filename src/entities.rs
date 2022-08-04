@@ -53,6 +53,11 @@ fn spawn_asteroids(mut commands: Commands, ascii: Res<AsciiSheet>) {
             }))
             .insert(Asteroid)
             .insert(RigidBody::Dynamic)
+            .insert(Damping {
+                angular_damping: 100.0,
+                ..Default::default()
+            })
+            .insert(Collider::cuboid(5.0, 5.0))
             .insert(Velocity {
                 linvel: Vec2::new(
                     abs_vel * angle.cos(),
@@ -80,6 +85,10 @@ fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
         }))
         .insert(Player)
         .insert(RigidBody::Dynamic)
+        .insert(Damping {
+            angular_damping: 100.0,
+            ..Default::default()
+        })
         .insert(Collider::ball(5.0))
         .insert(Velocity::default())
         .insert(ExternalForce::default())
