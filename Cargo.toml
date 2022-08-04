@@ -12,7 +12,8 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.7", features = ["dynamic"]}
-simple-stopwatch = "0.1.4"
-bevy-inspector-egui = "0.11.0"
+bevy = { version = "0.8.0", features = ["dynamic", "wayland"]}
+bevy_rapier2d = "0.16.0"
+bevy-inspector-egui-rapier = { version = "0.5.0", features = ["rapier2d"] }
+bevy-inspector-egui = "0.12.1"
 rand = "0.8.5"

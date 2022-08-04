@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-const BASE_SIZE: f32 = 5.0;
+const BASE_SIZE: f32 = 10.0;
 
 pub struct AsciiPlugin;
 
@@ -17,7 +17,6 @@ pub fn spawn_ascii_sprite(
     ascii: &AsciiSheet,
     index: usize,
     color: Color,
-    translation: Vec3
 ) -> Entity {
     assert!(index < 256, "Index to obtain ascii sprite is out of range");
     
@@ -28,10 +27,7 @@ pub fn spawn_ascii_sprite(
     commands.spawn_bundle(SpriteSheetBundle {
         sprite: sprite,
         texture_atlas: ascii.0.clone(),
-        transform: Transform {
-            translation: translation,
-            ..Default::default()
-        },
+        transform: Transform::default(),
         ..Default::default()
     })
     .id()
@@ -48,7 +44,8 @@ fn load_spritesheet(
         Vec2::splat(9.0),
         16,
         16,
-        Vec2::splat(2.0)
+        Vec2::splat(2.0),
+        Vec2::splat(0.0)
     );
 
     let atlas_handle = texture_atlases.add(atlas);

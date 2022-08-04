@@ -1,12 +1,14 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{
+    prelude::*,
+    render::{camera::ScalingMode, texture::ImageSettings},
+};
 
 mod debug;
+use bevy_rapier2d::prelude::*;
 use debug::DebugPlugin;
 
 mod entities;
 use entities::EntitiesPlugin;
-
-mod physics;
 
 mod ascii_sheet;
 use ascii_sheet::AsciiPlugin;
@@ -31,7 +33,10 @@ fn main() {
             resizable: false,
             ..Default::default()
         })
+        .insert_resource(ImageSettings::default_nearest())
         .add_plugins(DefaultPlugins)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(EntitiesPlugin)
         .add_plugin(DebugPlugin)
         .add_plugin(AsciiPlugin)
@@ -40,15 +45,15 @@ fn main() {
 }
 
 fn spawn_camera(mut commands: Commands) {
-    let mut camera = OrthographicCameraBundle::new_2d();
+    let mut camera = Camera2dBundle::default();
 
-    camera.orthographic_projection.top = 100.0;
-    camera.orthographic_projection.bottom = -100.0;
+    camera.projection.top = 200.0;
+    camera.projection.bottom = -200.0;
 
-    camera.orthographic_projection.right = 100.0 * ASPECT_RATIO;
-    camera.orthographic_projection.left = -100.0 * ASPECT_RATIO;
+    camera.projection.right = 200.0 * ASPECT_RATIO;
+    camera.projection.left = -200.0 * ASPECT_RATIO;
     
-    camera.orthographic_projection.scaling_mode = ScalingMode::None;
+    camera.projection.scaling_mode = ScalingMode::None;
 
     commands.spawn_bundle(camera);
 }
