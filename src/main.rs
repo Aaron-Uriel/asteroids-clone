@@ -7,8 +7,17 @@ mod debug;
 use bevy_rapier2d::prelude::*;
 use debug::DebugPlugin;
 
-mod entities;
-use entities::EntitiesPlugin;
+mod world;
+use world::WorldPlugin;
+
+mod player;
+use player::PlayerPlugin;
+
+mod asteroids;
+use asteroids::AsteroidsPlugin;
+
+mod zero_gravity;
+use zero_gravity::ZeroGravityPlugin;
 
 mod ascii_sheet;
 use ascii_sheet::AsciiPlugin;
@@ -37,9 +46,12 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugin(RapierDebugRenderPlugin::default())
-        .add_plugin(EntitiesPlugin)
+        .add_plugin(PlayerPlugin)
+        .add_plugin(AsteroidsPlugin)
+        .add_plugin(WorldPlugin)
         .add_plugin(DebugPlugin)
         .add_plugin(AsciiPlugin)
+        .add_plugin(ZeroGravityPlugin)
         .add_startup_system(spawn_camera)
         .run();
 }

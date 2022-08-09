@@ -8,3 +8,5 @@ pub const WORLD_HALF_HEIGHT: f32 = 200.0;
 pub const WORLD_HALF_WIDTH: f32 = WORLD_HALF_HEIGHT * ASPECT_RATIO;
 
 pub const BASE_SPRITE_SIZE: Vec2 = Vec2::splat(10.0);
+
+pub const ASTEROIDS_LIMIT: u16 = 10;
