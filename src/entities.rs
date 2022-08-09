@@ -1,9 +1,10 @@
 use std::{f32, default::Default};
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
-use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::{prelude::*, rapier::prelude::CollisionEventFlags};
 use rand::distributions::Uniform;
 use crate::ascii_sheet::*;
+use crate::consts;
 
 #[derive(Inspectable, Component)]
 pub struct Player;
@@ -16,14 +17,50 @@ pub struct EntitiesPlugin;
 impl Plugin for EntitiesPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup)
+            .add_startup_system(create_world_border_sensor)
             .add_startup_system(spawn_player)
             .add_startup_system(spawn_asteroids)
+            .add_system(world_border_system)
             .add_system(handle_player_input);
     }
 }
 
 fn setup(mut rapier_conf: ResMut<RapierConfiguration>) {
     rapier_conf.gravity = Vec2::default();
+}
+
+fn create_world_border_sensor(mut commands: Commands) {
+    const BASE_HALF_HEIGHT: f32 = 150.0;
+    const BASE_HALF_WIDTH: f32 = BASE_HALF_HEIGHT * crate::ASPECT_RATIO;
+
+    commands.spawn()
+        .insert(Collider::polyline(
+            vec![
+                Vec2::new( BASE_HALF_WIDTH,  BASE_HALF_HEIGHT),
+                Vec2::new(-BASE_HALF_WIDTH,  BASE_HALF_HEIGHT),
+                Vec2::new(-BASE_HALF_WIDTH, -BASE_HALF_HEIGHT),
+                Vec2::new( BASE_HALF_WIDTH, -BASE_HALF_HEIGHT),
+                Vec2::new( BASE_HALF_WIDTH,  BASE_HALF_HEIGHT)
+            ],
+            None
+        ))
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(Sensor);
+}
+
+fn world_border_system(
+    mut commands: Commands,
+    context: Res<RapierContext>,
+    mut collision_events: EventReader<CollisionEvent>,
+) {/*
+    for collision_event in collision_events.iter() {
+        if let CollisionEvent::Started(entity1, entity2, flags) = collision_event {
+            if flags == CollisionEventFlags::SENSOR {
+                entity1.
+            }
+        }
+        println!("Received collision event: {:?}", collision_event);
+    }*/
 }
 
 fn spawn_asteroids(mut commands: Commands, ascii: Res<AsciiSheet>) {
@@ -43,6 +80,7 @@ fn spawn_asteroids(mut commands: Commands, ascii: Res<AsciiSheet>) {
             &ascii,
             0,
             Color::rgb(0.4, 0.5, 0.9),
+            consts::BASE_SPRITE_SIZE
         );
 
         commands.entity(new_asteroid)
@@ -74,7 +112,8 @@ fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
         &mut commands,
         &ascii,
         16,
-        Color::rgb(0.3, 0.3, 0.9)
+        Color::rgb(0.3, 0.3, 0.9),
+        consts::BASE_SPRITE_SIZE
     );
 
     commands.entity(player)

@@ -13,8 +13,8 @@ use entities::EntitiesPlugin;
 mod ascii_sheet;
 use ascii_sheet::AsciiPlugin;
 
-const HEIGHT: f32 = 720.0;
-const ASPECT_RATIO: f32 = 4.0 / 3.0;
+mod consts;
+use consts::*;
 
 mod my_colors {
     use bevy::render::color::Color;
@@ -26,7 +26,7 @@ fn main() {
     App::new()
         .insert_resource(ClearColor(my_colors::CLEAR))
         .insert_resource(WindowDescriptor {
-            width: HEIGHT * ASPECT_RATIO,
+            width: WIDTH,
             height: HEIGHT,
             title: "Asteroids".to_string(),
             present_mode: bevy::window::PresentMode::Fifo,
@@ -47,11 +47,11 @@ fn main() {
 fn spawn_camera(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
 
-    camera.projection.top = 200.0;
-    camera.projection.bottom = -200.0;
+    camera.projection.top = WORLD_HALF_HEIGHT;
+    camera.projection.bottom = -WORLD_HALF_HEIGHT;
 
-    camera.projection.right = 200.0 * ASPECT_RATIO;
-    camera.projection.left = -200.0 * ASPECT_RATIO;
+    camera.projection.right = WORLD_HALF_WIDTH;
+    camera.projection.left = -WORLD_HALF_WIDTH;
     
     camera.projection.scaling_mode = ScalingMode::None;
 
