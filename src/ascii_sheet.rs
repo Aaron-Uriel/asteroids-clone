@@ -20,12 +20,11 @@ pub fn spawn_ascii_sprite(
     
     let mut sprite = TextureAtlasSprite::new(index);
     sprite.color = color; 
-    sprite.custom_size = Some(size); 
+    sprite.custom_size = Some(size);
 
     commands.spawn_bundle(SpriteSheetBundle {
         sprite: sprite,
         texture_atlas: ascii.0.clone(),
-        transform: Transform::default(),
         ..Default::default()
     })
     .id()

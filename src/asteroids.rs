@@ -44,7 +44,7 @@ fn spawn_asteroids_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
             .insert_bundle(TransformBundle::from(Transform::from_xyz(
                 coordinates_range.sample(&mut rng),
                 coordinates_range.sample(&mut rng),
-                coordinates_range.sample(&mut rng)
+                700.0
             )))
             .insert(Asteroid)
             .insert(RigidBody::Dynamic)
