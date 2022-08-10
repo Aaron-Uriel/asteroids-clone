@@ -3,7 +3,7 @@ use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 use crate::{
     ascii_sheet::*,
-    consts::*
+    consts
 };
 
 #[derive(Component, Inspectable)]
@@ -21,20 +21,15 @@ impl Plugin for PlayerPlugin {
 fn spawn_player_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
     use std::f32;
 
-    let player = spawn_ascii_sprite(
-        &mut commands,
-        &ascii,
-        16,
-        Color::rgb(0.3, 0.3, 0.9),
-        BASE_SPRITE_SIZE
-    );
+    let player = ascii.spawn(&mut commands, 16, Color::rgb(0.3, 0.3, 0.9));
+
     let player_angle = Quat::from_rotation_z(2.0 * f32::consts::PI);
 
     commands.entity(player)
         .insert_bundle(TransformBundle::from(Transform {
             translation: Vec3::new(0.0, 0.0, 900.0),
             rotation: player_angle,
-            ..Default::default()
+            scale: consts::BASE_SPRITE_SCALE,
         }))
         .insert(Player)
         .insert(RigidBody::Dynamic)
@@ -53,7 +48,7 @@ fn player_movement_system(
     keyboard: Res<Input<KeyCode>>,
     time: Res<Time>
 ) {
-    const BASE_FORCE_MAGNITUDE: f32 = 70.0;
+    const BASE_FORCE_MAGNITUDE: f32 = 100.0;
     const BASE_ROTATION: f32 = 5.0;
 
     let (mut ext_force, mut transform) = query.single_mut();

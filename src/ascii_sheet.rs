@@ -9,25 +9,20 @@ impl Plugin for AsciiPlugin {
     }
 }
 
-pub fn spawn_ascii_sprite(
-    commands: &mut Commands,
-    ascii: &AsciiSheet,
-    index: usize,
-    color: Color,
-    size: Vec2
-) -> Entity {
-    assert!(index < 256, "Index to obtain ascii sprite is out of range");
+impl AsciiSheet {
+    pub fn spawn(&self, commands: &mut Commands, index: usize, color: Color) -> Entity {
+        assert!(index < 256, "Index to obtain ascii sprite is out of range");
     
-    let mut sprite = TextureAtlasSprite::new(index);
-    sprite.color = color; 
-    sprite.custom_size = Some(size);
+        let mut sprite = TextureAtlasSprite::new(index);
+        sprite.color = color; 
 
-    commands.spawn_bundle(SpriteSheetBundle {
-        sprite: sprite,
-        texture_atlas: ascii.0.clone(),
-        ..Default::default()
-    })
-    .id()
+        commands.spawn_bundle(SpriteSheetBundle {
+            sprite: sprite,
+            texture_atlas: self.0.clone(),
+            ..Default::default()
+        })
+        .id()
+    }
 }
 
 fn load_spritesheet(
