@@ -37,7 +37,7 @@ fn spawn_player_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
             angular_damping: 100.0,
             ..Default::default()
         })
-        .insert(Collider::ball(5.0))
+        .insert(Collider::triangle(Vec2::new(4.0, 0.0), Vec2::new(-4.0, 4.0), Vec2::new(-4.0, -4.0)))
         .insert(Velocity::default())
         .insert(ExternalForce::default())
         .insert(Name::new("Player"));
@@ -48,7 +48,7 @@ fn player_movement_system(
     keyboard: Res<Input<KeyCode>>,
     time: Res<Time>
 ) {
-    const BASE_FORCE_MAGNITUDE: f32 = 100.0;
+    const BASE_FORCE_MAGNITUDE: f32 = 75.0;
     const BASE_ROTATION: f32 = 5.0;
 
     let (mut ext_force, mut transform) = query.single_mut();
