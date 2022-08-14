@@ -33,9 +33,11 @@ fn spawn_player_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
         }))
         .insert(Player)
         .insert(RigidBody::Dynamic)
+        .insert(Sleeping::disabled())
+        .insert(ActiveEvents::COLLISION_EVENTS)
         .insert(Damping {
             angular_damping: 100.0,
-            ..Default::default()
+            linear_damping: 0.5
         })
         .insert(Collider::triangle(Vec2::new(4.0, 0.0), Vec2::new(-4.0, 4.0), Vec2::new(-4.0, -4.0)))
         .insert(Velocity::default())

@@ -24,7 +24,7 @@ fn spawn_asteroids_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
 
     let mut rng = rand::thread_rng();
     let coordinates_range: Uniform<f32> = Uniform::from(-100.0..100.0);
-    let impulse_range: Uniform<f32> = Uniform::from(0.25..0.5);
+    let impulse_range: Uniform<f32> = Uniform::from(0.1..0.25);
     let angle_range: Uniform<f32> = Uniform::from(0.0..(2.0 * f32::consts::PI));
     let boolean_rand = Bernoulli::new(0.5).unwrap();
 
@@ -50,10 +50,12 @@ fn spawn_asteroids_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
                 }
             ))
             .insert(RigidBody::Dynamic)
+            .insert(Sleeping::disabled())
             .insert(Collider::cuboid(
                 2.75 * consts::BASE_SPRITE_SCALE.x,
                 2.75 * consts::BASE_SPRITE_SCALE.y 
             ))
+            .insert(ActiveEvents::COLLISION_EVENTS)
             .insert(ExternalImpulse {
                 impulse: Vec2::new(
                     impulse_range.sample(&mut rng) * if boolean_rand.sample(&mut rng) { -1.0 } else { 1.0 },

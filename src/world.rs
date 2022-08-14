@@ -1,30 +1,30 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 use crate::consts::*;
 
+#[derive(Component)]
 pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_world_border_sensor_system);
+        app
+            .add_system(world_border_system);
     }
 }
 
-fn spawn_world_border_sensor_system(mut commands: Commands) {
-    const BASE_HALF_HEIGHT: f32 = 150.0;
-    const BASE_HALF_WIDTH: f32 = BASE_HALF_HEIGHT * crate::ASPECT_RATIO;
+fn world_border_system(
+    mut entity_query: Query<&mut Transform>
+) {
+    const BORDER_HALF_WIDTH: f32 = WORLD_HALF_WIDTH + WORLD_BORDER_MARGIN;
+    const BORDER_HALF_HEIGHT: f32 = WORLD_HALF_HEIGHT + WORLD_BORDER_MARGIN;
 
-    commands.spawn()
-        .insert(Collider::polyline(
-            vec![
-                Vec2::new( BASE_HALF_WIDTH,  BASE_HALF_HEIGHT),
-                Vec2::new(-BASE_HALF_WIDTH,  BASE_HALF_HEIGHT),
-                Vec2::new(-BASE_HALF_WIDTH, -BASE_HALF_HEIGHT),
-                Vec2::new( BASE_HALF_WIDTH, -BASE_HALF_HEIGHT),
-                Vec2::new( BASE_HALF_WIDTH,  BASE_HALF_HEIGHT)
-            ],
-            None
-        ))
-        .insert(ActiveEvents::COLLISION_EVENTS)
-        .insert(Sensor);
+    for mut entity_transform in &mut entity_query {
+        if entity_transform.translation.x >=  BORDER_HALF_WIDTH
+        || entity_transform.translation.x <= -BORDER_HALF_WIDTH {
+            entity_transform.translation.x *= -1.0;
+        }
+        if entity_transform.translation.y >=  BORDER_HALF_HEIGHT
+        || entity_transform.translation.y <= -BORDER_HALF_HEIGHT {
+            entity_transform.translation.y *= -1.0;
+        }
+    }
 }
