@@ -3,7 +3,8 @@ use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 use crate::{
     ascii_sheet::*,
-    consts
+    consts,
+    health::*
 };
 
 #[derive(Component, Inspectable)]
@@ -20,6 +21,7 @@ impl Plugin for PlayerPlugin {
 
 fn spawn_player_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
     use std::f32;
+    use std::time::Duration;
 
     let player = ascii.spawn(&mut commands, 16, Color::rgb(0.3, 0.3, 0.9));
 
@@ -32,6 +34,7 @@ fn spawn_player_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
             scale: consts::BASE_SPRITE_SCALE,
         }))
         .insert(Player)
+        .insert_bundle(HealthBundle::new(5, Duration::from_secs(5))) 
         .insert(RigidBody::Dynamic)
         .insert(Sleeping::disabled())
         .insert(ActiveEvents::COLLISION_EVENTS)
@@ -80,4 +83,11 @@ fn player_movement_system(
             false => -BASE_ROTATION * time.delta_seconds()
         });
     }
+}
+
+fn handle_player_collision(
+    mut commands: &mut Commands,
+
+) {
+
 }

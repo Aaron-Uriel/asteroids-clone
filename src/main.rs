@@ -2,9 +2,13 @@ use bevy::{
     prelude::*,
     render::{camera::ScalingMode, texture::ImageSettings},
 };
+use bevy_rapier2d::prelude::*;
+
+mod health;
+use health::HealthPlugin;
+
 
 mod debug;
-use bevy_rapier2d::prelude::*;
 use debug::DebugPlugin;
 
 mod world;
@@ -47,6 +51,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(PlayerPlugin)
+        .add_plugin(HealthPlugin)
         .add_plugin(AsteroidsPlugin)
         .add_plugin(WorldPlugin)
         .add_plugin(DebugPlugin)

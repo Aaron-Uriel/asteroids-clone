@@ -10,7 +10,8 @@ impl Plugin for DebugPlugin {
         if cfg!(debug_assertions) {
             app.add_plugin(WorldInspectorPlugin::new())
                 .register_inspectable::<asteroids::Asteroid>()
-                .register_inspectable::<player::Player>();
+                .register_inspectable::<player::Player>()
+                .register_inspectable::<health::Health>();
         }
     }
 }

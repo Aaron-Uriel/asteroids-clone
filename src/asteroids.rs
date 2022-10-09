@@ -29,9 +29,8 @@ fn spawn_asteroids_system(mut commands: Commands, ascii: Res<AsciiSheet>) {
     let boolean_rand = Bernoulli::new(0.5).unwrap();
 
     let asteroids = commands.spawn()
+        .insert_bundle(TransformBundle::default())
         .insert(Name::new("Asteroids"))
-        .insert(Transform::default())
-        .insert(GlobalTransform::default())
         .insert(ComputedVisibility::default())
         .insert(Visibility::visible())
         .id();
